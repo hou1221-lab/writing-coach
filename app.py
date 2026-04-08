@@ -1,59 +1,54 @@
 import streamlit as st
-import json
 
-st.set_page_config(page_title="數位直排作文稿紙", layout="wide")
+# --- 網頁設定 ---
+st.set_page_config(page_title="語音作文教練", layout="wide")
 
-def load_db():
-    with open('writing_vault.json', 'r', encoding='utf-8') as f:
-        return json.load(f)
-
-db = load_db()
-
+# --- CSS: 清爽直排文字樣式 ---
 st.markdown("""
 <style>
-    .manuscript-paper {
+    /* 這裡拿掉了格線，改用大方、有質感的直排字體 */
+    .vertical-text-container {
         writing-mode: vertical-rl;
         text-orientation: upright;
-        background-color: #fffdf5;
-        background-image: 
-            linear-gradient(#d1e7dd 1.5px, transparent 1.5px),
-            linear-gradient(90deg, #d1e7dd 1.5px, transparent 1.5px);
-        background-size: 40px 40px;
-        line-height: 40px;
+        background-color: #ffffff;
         padding: 40px;
-        border: 3px solid #2e7d32;
-        min-height: 700px;
-        width: fit-content;
-        margin: auto;
+        border-left: 5px solid #2e7d32; /* 左側邊界線裝飾 */
+        min-height: 600px;
+        width: 100%;
         font-family: "Noto Serif TC", "Microsoft JhengHei", serif;
-        font-size: 26px;
-        letter-spacing: 14px;
-        color: #333;
+        font-size: 28px;
+        line-height: 2; /* 讓行間距變寬，方便閱讀 */
+        color: #1a1a1a;
+        margin-top: 20px;
+    }
+    .title-display {
+        writing-mode: vertical-rl;
+        font-size: 36px;
+        font-weight: bold;
+        margin-left: 50px;
+        color: #2e7d32;
     }
 </style>
 """, unsafe_allow_html=True)
 
+# --- 側邊欄：完全自定義區 ---
 with st.sidebar:
-    st.title("作文靈感庫")
-    selected_el = st.selectbox("🎯 選擇今日主題元素", list(db["elements"].keys()))
-    st.write("---")
-    st.subheader(f"{selected_el} 的 7 個內容：")
-    for item in db["elements"][selected_el]:
-        st.write(f"✅ {item}")
-    st.write("---")
-    st.subheader("📝 本次段落成語任務")
-    for i, idm in enumerate(db["idioms"]):
-        st.write(f"段落 {i+1}：{idm}")
+    st.title("⚙️ 寫作設定")
+    
+    # 1. 題目
+    essay_title = st.text_input("📍 作文題目", value="我的生活點滴")
+    
+    st.divider()
+    
+    # 2. 元素內容 (使用者自行建立)
+    st.subheader("💎 我的特色元素")
+    custom_element = st.text_input("元素名稱", "例如：我的鋼琴之路")
+    custom_contents = st.text_area("輸入 7 個靈感內容 (每行一個)", 
+                                 "旋律的起伏\n黑白鍵的對話\n指尖的靈魂\n反覆練習的汗水\n曲終的餘韻\n鋼琴的結構\n比賽的節奏",
+                                 height=200)
+    contents_list = custom_contents.split('\n')[:7]
 
-st.title("✍️ 直排語音作文系統")
-raw_input = st.text_area("🎙️ 請在此輸入或貼上語音辨識的文字：", height=200, placeholder="直接講出你的故事...")
+    st.divider()
 
-if st.button("✨ 執行微修飾並填入直排稿紙"):
-    if raw_input:
-        fillers = ["然後", "就是說", "那個", "呃", "啊", "呢", "喔"]
-        refined_text = raw_input
-        for f in fillers:
-            refined_text = refined_text.replace(f, "")
-        st.markdown(f'<div class="manuscript-paper">{refined_text}</div>', unsafe_allow_html=True)
-    else:
-        st.warning("請先提供內容喔！")
+    # 3. 成語自定義 (使用者自行打)
+    st.subheader("📖 挑戰成語")
